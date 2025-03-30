@@ -21,7 +21,7 @@ const useChirp = () => {
     };
 
     getChirps();
-  });
+  }, []);
 
   const createChirp = async ({ content, author }) => {
     try {
