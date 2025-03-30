@@ -1,34 +1,7 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
+import useChirp from "./useChirp";
 import ProfileIcon from "./assets/profile.jpeg";
 import "./App.css";
-
-const API_URL = import.meta.env.VITE_API_URL;
-
-const getChirps = async () => {
-  try {
-    const response = await fetch(`${API_URL}/api/chirps`);
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error(error);
-    return [];
-  }
-};
-
-const createChirp = async ({ content, author }) => {
-  try {
-    const response = await fetch(`${API_URL}/api/chirps`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ content, author }),
-    });
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error(error);
-    return null;
-  }
-};
 
 const formatDate = (date) => {
   const formatter = new Intl.DateTimeFormat("pt-BR", {
@@ -39,7 +12,7 @@ const formatDate = (date) => {
 };
 
 function App() {
-  const [chirps, setChirps] = useState([]);
+  const { chirps, setChirps, loading, createChirp } = useChirp();
 
   const [form, setForm] = useState({
     content: "",
@@ -58,15 +31,6 @@ function App() {
 
     setForm({ content: "", author: "" });
   };
-
-  useEffect(() => {
-    const fetchChirps = async () => {
-      const chirpsData = await getChirps();
-      setChirps(chirpsData);
-    };
-
-    fetchChirps();
-  }, []);
 
   return (
     <div className="container">
@@ -98,20 +62,26 @@ function App() {
       <hr />
 
       <main className="chirps">
-        {chirps.map((chirp, i) => {
-          return (
-            <>
-              <div key={chirp.id} className="chirp">
-                <span className="content">{chirp.content}</span>
-                <span className="author">
-                  Feito por <strong>{chirp.author}</strong>
-                </span>
-                <span className="createdAt">{formatDate(chirp.createdAt)}</span>
-              </div>
-              {i < chirps.length - 1 && <hr />}
-            </>
-          );
-        })}
+        {loading ? (
+          <h3>Carregando...</h3>
+        ) : (
+          chirps.map((chirp, i) => {
+            return (
+              <>
+                <div key={chirp.id} className="chirp">
+                  <span className="content">{chirp.content}</span>
+                  <span className="author">
+                    Feito por <strong>{chirp.author}</strong>
+                  </span>
+                  <span className="createdAt">
+                    {formatDate(chirp.createdAt)}
+                  </span>
+                </div>
+                {i < chirps.length - 1 && <hr />}
+              </>
+            );
+          })
+        )}
       </main>
 
       <hr />
